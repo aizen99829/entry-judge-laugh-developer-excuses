@@ -1,19 +1,31 @@
-// Make the AI Judge Laugh: Developer Excuses — writes the entry line to /output/entry.txt.
-import * as fs from "node:fs";
+// Developer Excuses — my entry for the AI judge.
+// A single excuse, written out to /output/entry.txt.
+import { mkdirSync, writeFileSync } from "node:fs";
 
-const line =
+const excuse =
   "I didn't break production — I ran an unannounced resilience drill. It failed, which only proves how badly it needed one.";
 
-// Guard: one line, 1-200 characters, not only whitespace.
-if (line.length < 1 || line.length > 200) {
-  throw new Error(`entry must be 1-200 characters, got ${line.length}`);
-}
-if (line.trim().length === 0) {
-  throw new Error("entry must not be only whitespace");
-}
-if (line.split("\n").length !== 1) {
-  throw new Error("entry must be exactly one line");
+const LIMIT = 200;
+const OUT_DIR = "/output";
+const OUT_FILE = "/output/entry.txt";
+
+function reject(why: string): never {
+  throw new Error(`entry rejected: ${why}`);
 }
 
-fs.mkdirSync("/output", { recursive: true });
-fs.writeFileSync("/output/entry.txt", line, "utf8");
+// The excuse must be one non-empty line inside the character limit.
+if (excuse.length === 0) {
+  reject("the excuse is empty");
+}
+if (excuse.length > LIMIT) {
+  reject(`the excuse is ${excuse.length} characters, past the ${LIMIT} limit`);
+}
+if (excuse.trim().length === 0) {
+  reject("the excuse is only whitespace");
+}
+if (excuse.includes("\n")) {
+  reject("the excuse must fit on one line");
+}
+
+mkdirSync(OUT_DIR, { recursive: true });
+writeFileSync(OUT_FILE, excuse, "utf8");
